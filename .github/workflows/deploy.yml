@@ -19,15 +19,10 @@ jobs:
 
       - name: Install Docker
         run: |
-          echo alias docker=podman >> ~/.zshrc
-          source ~/.zshrc
-           brew install podman
-           # podman system service unix:///var/run/podman/podman.sock --time 0 &
-           # ln -sf /var/run/podman/podman.sock /var/run/docker.sock
-           podman machine init
-           brew tap cfergeau/crc
-           brew reinstall vfkit
-           podman machine start
+          brew install docker
+          brew install colima
+          colima start
+          docker --version
 
       #     - name: Wait for Docker
       #       run: while (! docker stats --no-stream ); do echo "Waiting for Podman to launch..."; sleep 1; done
