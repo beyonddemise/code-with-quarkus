@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  native_build:
-    runs-on: ubuntu-latest
+  mac_build:
+    runs-on: macos-latest
     name: Build native image
     steps:
       - name: GitHub container Registry login
@@ -32,9 +32,6 @@ jobs:
           version: "mandrel-latest"
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: "true"
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
 
       - name: Build Sample Quarkus native executable
         env:
@@ -61,5 +58,59 @@ jobs:
               -Dquarkus.container-image.name=code-with-quarkus \
               -Dquarkus.container-image.tag=${tag} \
               -Dquarkus.container-image.additional-tags=${version} \
-              -Dquarkus.jib.platforms=linux/amd64,linux/arm64 \
+              -Dquarkus.jib.platforms=linux/arm64 \
+              clean package
+
+  linux_build:
+    runs-on: macos-latest
+    name: Build native image
+    steps:
+      - name: GitHub container Registry login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout the code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.WORKFLOW_SECRET }}
+
+      - name: Install GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: "21"
+          distribution: "mandrel"
+          version: "mandrel-latest"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: "true"
+
+      - name: Build Sample Quarkus native executable
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name || 'develop' }}
+        run: |
+          version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          if [[ "$BRANCH_NAME" == "main" ]]; then
+            tag="latest"
+          else
+            tag="$BRANCH_NAME"
+          fi
+
+          mvn -Pnative \
+              --no-transfer-progress \
+              --show-version \
+              --fail-fast \
+              --batch-mode \
+              -DskipTests \
+              -Dquarkus.native.container-build=true \
+              -Dquarkus.container-image.build=true \
+              -Dquarkus.container-image.push=true \
+              -Dquarkus.container-image.registry=ghcr.io \
+              -Dquarkus.container-image.group=beyonddemise \
+              -Dquarkus.container-image.name=code-with-quarkus \
+              -Dquarkus.container-image.tag=${tag} \
+              -Dquarkus.container-image.additional-tags=${version} \
+              -Dquarkus.jib.platforms=linux/amd64 \
               clean package
