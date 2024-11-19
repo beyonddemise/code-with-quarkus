@@ -25,6 +25,8 @@ jobs:
            # podman system service unix:///var/run/podman/podman.sock --time 0 &
            # ln -sf /var/run/podman/podman.sock /var/run/docker.sock
            podman machine init
+           brew tap cfergeau/crc
+           brew reinstall vfkit
            podman machine start
 
       #     - name: Wait for Docker
