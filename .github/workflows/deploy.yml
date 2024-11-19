@@ -8,8 +8,7 @@ on:
 
 jobs:
   mac_build:
-    runs-on: ubuntu-latest
-    architecture: arm64
+    runs-on: arm-ubuntu-24
     name: Build arm image
     steps:
       - name: GitHub container Registry login
