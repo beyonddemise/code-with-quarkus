@@ -20,6 +20,10 @@ jobs:
       - name: Install Docker
         run: |
           brew install podman
+          podman system service --time 0 unix:///var/run/podman/podman.sock &
+          ln -sf /var/run/podman/podman.sock /var/run/docker.sock
+          podman machine init
+          podman machine start
 
       #     - name: Wait for Docker
       #       run: while (! docker stats --no-stream ); do echo "Waiting for Podman to launch..."; sleep 1; done
@@ -46,34 +50,34 @@ jobs:
         run: |
           ./ghbuild.sh linux/arm64
 
-  amd_build:
-    runs-on: ubuntu-latest
-    name: Build x86 image
-    steps:
-      - name: GitHub container Registry login
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  # amd_build:
+  #   runs-on: ubuntu-latest
+  #   name: Build x86 image
+  #   steps:
+  #     - name: GitHub container Registry login
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.repository_owner }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Checkout the code
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-          token: ${{ secrets.WORKFLOW_SECRET }}
+  #     - name: Checkout the code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: true
+  #         token: ${{ secrets.WORKFLOW_SECRET }}
 
-      - name: Install GraalVM
-        uses: graalvm/setup-graalvm@v1
-        with:
-          java-version: '21'
-          distribution: 'mandrel'
-          version: 'mandrel-latest'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          native-image-job-reports: 'true'
+  #     - name: Install GraalVM
+  #       uses: graalvm/setup-graalvm@v1
+  #       with:
+  #         java-version: '21'
+  #         distribution: 'mandrel'
+  #         version: 'mandrel-latest'
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         native-image-job-reports: 'true'
 
-      - name: Build Sample Quarkus native executable
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name || 'develop' }}
-        run: |
-          ./ghbuild.sh linux/amd64
+  #     - name: Build Sample Quarkus native executable
+  #       env:
+  #         BRANCH_NAME: ${{ github.head_ref || github.ref_name || 'develop' }}
+  #       run: |
+  #         ./ghbuild.sh linux/amd64
