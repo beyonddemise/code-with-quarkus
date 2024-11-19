@@ -8,7 +8,8 @@ on:
 
 jobs:
   arm_build:
-    runs-on: ArmBuilder
+    runs-on:
+      labels: ArmBuilder
     name: Build arm image
     steps:
       - name: Checkout the code
