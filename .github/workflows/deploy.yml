@@ -9,6 +9,7 @@ on:
 jobs:
   arm_build:
     runs-on:
+      group: Public
       labels: ArmBuilder
     name: Build arm image
     steps:
