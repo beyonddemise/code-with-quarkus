@@ -13,4 +13,20 @@ public class GreetingResource {
     public String hello() {
         return "Hello from Quarkus REST";
     }
+
+    @Path("/world")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String world() {
+        try {
+            java.io.InputStream is = getClass().getClassLoader().getResourceAsStream("test.json");
+            if (is == null) {
+                return "{\"error\": \"Resource not found\"}";
+            }
+            return new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        } catch (java.io.IOException e) {
+            return "{\"error\": \"" + e.getMessage() + "\"}";
+        }
+
+    }
 }
